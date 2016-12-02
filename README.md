@@ -6,4 +6,4 @@
 ## License
 
 * The license for this package is MIT.
-* The license for the upstream source is LGPL2.1.
+* The license for the upstream source is GPL2.
