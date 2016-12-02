@@ -1,0 +1,166 @@
+# This file is part of libertine linux's package automake. It is subject to the licence terms in the COPYRIGHT file found in the top-level directory of this distribution and at https://raw.githubusercontent.com/libertine-linux-packages/libertine/master/COPYRIGHT. No part of libertine linux's package automake, including this file, may be copied, modified, propagated, or distributed except according to the terms contained in the COPYRIGHT file.
+# Copyright © 2016 The developers of libertine linux's package automake. See the COPYRIGHT file in the top-level directory of this distribution and at https://raw.githubusercontent.com/libertine-linux-packages/libertine/master/COPYRIGHT.
+
+
+variant=upstream
+
+depends build_gnuconfig
+
+case "$package" in
+	
+	build_automake)
+		
+		depends build_perl
+		
+		build_provides aclocal automake
+		
+		depends build_libtool
+		
+		libertine_compile_build_automake()
+		{
+			_libertine_compile_automake_internal false "$(libertine_public_outputBuildSysrootPath)" "$(libertine_public_outputBuildSysrootPath)"/usr/share
+		}
+		
+	;;
+	
+	automake)
+		
+		depends perl
+		
+		depends slibtool
+	
+		libertine_compile_automake()
+		{
+			_libertine_compile_automake_internal true "$(libertine_public_outputInitramfsPath)" /usr/share
+		}
+		
+	;;
+	
+esac
+
+build_needs env sh
+
+build_needs mkdir sed chmod ln cp
+_libertine_compile_automake_internal()
+{
+	# The following paths are currently in a fixed location in the root:-
+	# @Aclocal::perl_libdirs = ('@datadir@/@PACKAGE@-@APIVERSION@')
+	# @Automake::perl_libdirs = ('@datadir@/@PACKAGE@-@APIVERSION@')
+	# my @automake_includes = ("@datadir@/aclocal-$APIVERSION");
+	# my @system_includes = ('@datadir@/aclocal');
+	
+	local isForHost="$1"
+	
+	local destinationSysrootFolderPath="$2"
+	local dataFolderPath="$3"
+	
+	local version=1.15
+	local year=2014
+	
+	local destinationBinaryFolderPath="$destinationSysrootFolderPath"/usr/bin
+	mkdir -m 0755 -p "$destinationBinaryFolderPath"
+		
+	if $isForHost; then
+		local shaBang='/usr/bin/env perl'
+		local shell='/usr/bin/sh'
+	else
+		local shaBang="$(libertine_public_PATH)/env perl"
+		local shell="$(libertine_public_PATH)"/sh
+	fi
+	
+	pushd "$(libertine_public_sourcePath)"
+		
+		local binaryName
+		for binaryName in aclocal automake
+		do
+			local destinationVersionedBinaryFilePath="$destinationBinaryFolderPath"/"$binaryName"-"$version"
+			
+			sed \
+				-e 's;^#!@PERL@ -w;#!'"$shaBang"';g' \
+				-e 's;@PERL@;perl;g' \
+				-e 's;@SHELL@;'"$shell"';g' \
+				-e 's;@APIVERSION@;'"$version"';g' \
+				-e 's;@PACKAGE@;automake;g' \
+				-e 's;@PACKAGE_URL@;http://www.gnu.org/software/automake/;g' \
+				-e 's;@PACKAGE_BUGREPORT@;bug-automake@gnu.org;g' \
+				-e 's;@datadir@;'"$dataFolderPath"';g' \
+				-e 's;@am_AUTOCONF@;autoconf;g' \
+				-e 's;@am_AUTOM4TE@;autom4te;g' \
+				bin/"$binaryName".in >"$destinationVersionedBinaryFilePath"
+			
+			chmod +x "$destinationVersionedBinaryFilePath"
+			
+			ln -s "$binaryName"-"$version" "$destinationBinaryFolderPath"/"$binaryName"
+			
+		done
+		
+	
+		mkdir -m 0755 -p "$destinationSysrootFolderPath"/usr/share/aclocal
+		cp m4/acdir/README "$destinationSysrootFolderPath"/usr/share/aclocal
+		
+	
+		local aclocalShareFolderPath="$destinationSysrootFolderPath"/usr/share/aclocal-"$version"
+		mkdir -m 0755 -p "$aclocalShareFolderPath" "$aclocalShareFolderPath"/internal
+		set +f
+			cp m4/*.m4 "$aclocalShareFolderPath"
+			cp m4/internal/*.m4 "$aclocalShareFolderPath"/internal
+		set -f
+		sed \
+			-e 's,@configure_input@,Generated from amversion.in; do not edit by hand.,g' \
+			-e 's;@APIVERSION@;'"$version"';g' \
+			-e 's;@VERSION@;'"$version"';g' \
+			m4/amversion.in >"$aclocalShareFolderPath"/amversion.m4
+		
+		
+		if $isForHost; then
+			:
+		else
+			# Overlap with libtool
+			# typically these files are found in a 'build-aux' folder
+			local miscellaneousFilesUsedByGnulibFolderPath="$(libertine_public_outputMiscPath)"
+	
+			local fileName
+			# We do not use the supplied config.guess config.sub - instead see below (we update with the version of gnuconfig)
+			for fileName in ar-lib compile depcomp install-sh mdate-sh missing mkinstalldirs texinfo.tex ylwrap
+			do
+				cp lib/"$fileName" "$miscellaneousFilesUsedByGnulibFolderPath"
+			done
+		fi
+	
+	
+		local automakeShareFolderPath="$destinationSysrootFolderPath"/usr/share/automake-"$version"
+		mkdir -m 0755 -p "$automakeShareFolderPath"
+	
+		local fileName
+		# We do not use the supplied config.guess config.sub - instead see below (we update with the version of gnuconfig)
+		for fileName in COPYING INSTALL ar-lib compile depcomp install-sh mdate-sh missing mkinstalldirs py-compile tap-driver.sh test-driver texinfo.tex ylwrap
+		do
+			cp lib/"$fileName" "$automakeShareFolderPath"
+		done
+		libertine_public_autoconf_replaceWithKnownVersionOfConfigSub "$automakeShareFolderPath"
+		libertine_public_autoconf_replaceWithKnownVersionOfConfigGuess "$automakeShareFolderPath"
+		libertine_public_autoconf_replaceWithKnownVersionOfLtmainSh "$automakeShareFolderPath"
+	
+		local automakeAmFolderPath="$automakeShareFolderPath"/am
+		mkdir -m 0755 -p "$automakeAmFolderPath"
+		set +f
+			cp lib/am/*.am "$automakeAmFolderPath"
+		set -f
+	
+	
+		local automakePerlLibFolderPath="$automakeShareFolderPath"/Automake
+		mkdir -m 0755 -p "$automakePerlLibFolderPath"
+		set +f
+			cp lib/Automake/*.pm "$automakePerlLibFolderPath"
+		set -f
+		sed \
+			-e 's,@configure_input@,Generated from Config.in; do not edit by hand.,g' \
+			-e 's;@APIVERSION@;'"$version"';g' \
+			-e 's;@VERSION@;'"$version"';g' \
+			-e 's;@RELEASE_YEAR@;'"$version"';g' \
+			-e 's;@PACKAGE@;automake;g' \
+			-e 's;@PACKAGE_URL@;http://www.gnu.org/software/automake/;g' \
+			-e 's;@datadir@;'"$dataFolderPath"';g' \
+			lib/Automake/Config.in >"$automakePerlLibFolderPath"/Config.pm
+	popd
+}
