@@ -64,8 +64,8 @@ _libertine_compile_automake_internal()
 		local shaBang='/usr/bin/env perl'
 		local shell='/usr/bin/sh'
 	else
-		local shaBang="$(libertine_public_PATH)/env perl"
-		local shell="$(libertine_public_PATH)"/sh
+		local shaBang="$(libertine_public_buildNeedsPath)/env perl"
+		local shell="$(libertine_public_buildNeedsPath)"/sh
 	fi
 	
 	pushd "$(libertine_public_sourcePath)"
