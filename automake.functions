@@ -16,6 +16,8 @@ case "$package" in
 		
 		depends build_libtool
 		
+		depends build_pkg_config
+		
 		libertine_compile_build_automake()
 		{
 			_libertine_compile_automake_internal false "$(libertine_public_outputBuildSysrootPath)" "$(libertine_public_outputBuildSysrootPath)"/usr/share
@@ -163,4 +165,27 @@ _libertine_compile_automake_internal()
 			-e 's;@datadir@;'"$dataFolderPath"';g' \
 			lib/Automake/Config.in >"$automakePerlLibFolderPath"/Config.pm
 	popd
+	
+	# Populate /usr/share/aclocal with autoconf-archive
+	local acLocalFolderPath="$destinationSysrootFolderPath"/usr/share/aclocal
+	rm -rf "$acLocalFolderPath"/README
+	pushd "$(libertine_public_packagePath)"/autoconf-archive/m4
+	
+		set +f
+		local m4File
+		for m4File in *.m4
+		do
+			set -f
+			cp "$m4File" "$acLocalFolderPath"
+		done
+		set -f
+		
+	popd
+	
+	# Add in pkg_config pkg.m4, but only for build; on the host initramfs, this will be merged in
+	if $isForHost; then
+		:
+	else
+		cp "$(libertine_public_outputBuildSysrootPath build_pkg_config)"/usr/share/aclocal/pkg.m4 "$acLocalFolderPath"
+	fi
 }
