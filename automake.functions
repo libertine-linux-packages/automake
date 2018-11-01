@@ -14,7 +14,7 @@ case "$package" in
 		
 		depends build_perl
 		
-		build_provides aclocal automake
+		build_provides aclocal aclocal-1.15 automake automake-1.15
 		
 		depends build_libtool
 		
@@ -94,7 +94,7 @@ _libertine_compile_automake_internal()
 			
 			chmod +x "$destinationVersionedBinaryFilePath"
 			
-			ln -s "$binaryName"-"$version" "$destinationBinaryFolderPath"/"$binaryName"
+			cp "$destinationVersionedBinaryFilePath" "$destinationBinaryFolderPath"/"$binaryName"
 			
 		done
 		
@@ -167,7 +167,7 @@ _libertine_compile_automake_internal()
 			-e 's;@datadir@;'"$dataFolderPath"';g' \
 			lib/Automake/Config.in >"$automakePerlLibFolderPath"/Config.pm
 	popd
-	
+		
 	# Populate /usr/share/aclocal with autoconf-archive
 	local acLocalFolderPath="$destinationSysrootFolderPath"/usr/share/aclocal
 	rm -rf "$acLocalFolderPath"/README
@@ -190,4 +190,5 @@ _libertine_compile_automake_internal()
 	else
 		cp "$(libertine_public_outputBuildSysrootPath build_pkg_config)"/usr/share/aclocal/pkg.m4 "$acLocalFolderPath"
 	fi
+
 }
