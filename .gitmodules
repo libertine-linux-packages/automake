@@ -1,7 +1,13 @@
+Updating origin
+https://github.com/libertine-linux-mirrors/automake
+Branch 'master' set up to track remote branch 'master' from 'origin'.
 [submodule "upstream"]
 	path = upstream
-	url = git://git.savannah.gnu.org/automake.git
+	url = https://github.com/libertine-linux-mirrors/automake.git
+	branch = master
+	libertine-linux-upstream = git://git.savannah.gnu.org/automake.git
 [submodule "autoconf-archive"]
 	path = autoconf-archive
-	url = https://github.com/peti/autoconf-archive.git
+	url = https://github.com/libertine-linux-clones/autoconf-archive.git
 	branch = master
+	libertine-linux-upstream = https://github.com/peti/autoconf-archive.git
