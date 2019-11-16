@@ -1,0 +1,2 @@
+upstream	git://git.savannah.gnu.org/automake.git
+autoconf-archive	https://github.com/peti/autoconf-archive.git
