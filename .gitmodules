@@ -6,3 +6,7 @@
 	path = autoconf-archive
 	url = https://github.com/libertine-linux-clones/autoconf-archive.git
 	branch = master
+	update = checkout
+	ignore = none
+	fetchRecurseSubmodules = true
+	shallow = true
