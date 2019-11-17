@@ -2,6 +2,10 @@
 	path = upstream
 	url = https://github.com/libertine-linux-mirrors/automake.git
 	branch = master
+	update = checkout
+	ignore = none
+	fetchRecurseSubmodules = true
+	shallow = true
 [submodule "autoconf-archive"]
 	path = autoconf-archive
 	url = https://github.com/libertine-linux-clones/autoconf-archive.git
