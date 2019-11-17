@@ -5,7 +5,7 @@
 	update = checkout
 	ignore = none
 	fetchRecurseSubmodules = true
-	shallow = true
+	shallow = false
 [submodule "autoconf-archive"]
 	path = autoconf-archive
 	url = https://github.com/libertine-linux-clones/autoconf-archive.git
@@ -13,4 +13,4 @@
 	update = checkout
 	ignore = none
 	fetchRecurseSubmodules = true
-	shallow = true
+	shallow = false
